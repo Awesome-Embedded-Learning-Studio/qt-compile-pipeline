@@ -1,0 +1,52 @@
+# CMake Toolchain File for Qt Cross-Compilation
+# 此文件由 scripts/03-build-target-qt.sh 自动生成
+# 占位符将被实际值替换
+
+# ================================================================
+# 目标系统信息
+# ================================================================
+set(CMAKE_SYSTEM_NAME @TARGET_OS@)
+set(CMAKE_SYSTEM_PROCESSOR @TARGET_ARCH@)
+
+# ================================================================
+# 编译器路径
+# ================================================================
+set(CMAKE_C_COMPILER @TOOLCHAIN_BIN_DIR@/@TOOLCHAIN_PREFIX@gcc)
+set(CMAKE_CXX_COMPILER @TOOLCHAIN_BIN_DIR@/@TOOLCHAIN_PREFIX@g++)
+set(CMAKE_AR @TOOLCHAIN_BIN_DIR@/@TOOLCHAIN_PREFIX@ar)
+set(CMAKE_STRIP @TOOLCHAIN_BIN_DIR@/@TOOLCHAIN_PREFIX@strip)
+set(CMAKE_RANLIB @TOOLCHAIN_BIN_DIR@/@TOOLCHAIN_PREFIX@ranlib)
+
+# ================================================================
+# Sysroot（可选）
+# ================================================================
+@SET_SYSROOT@
+# 当 TOOLCHAIN_SYSROOT 非空时，上述占位符会被替换为：
+# set(CMAKE_SYSROOT @TOOLCHAIN_SYSROOT@)
+# 当为空时，会被注释掉
+
+# ================================================================
+# 查找模式配置
+# ================================================================
+# 交叉编译时，只在目标系统中查找库和头文件
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+# PACKAGE 模式设为 BOTH，允许从 CMAKE_MODULE_PATH 查找自定义模块
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+
+# 设置查找根路径，防止 CMake 在主机系统中查找库
+# 必须设置此项，否则 CMAKE_FIND_ROOT_PATH_MODE_* ONLY 不会生效
+# 当 TOOLCHAIN_SYSROOT 非空时，上述占位符会被替换为：
+# set(CMAKE_FIND_ROOT_PATH @TOOLCHAIN_SYSROOT@)
+@SET_FIND_ROOT_PATH@
+
+# ================================================================
+# 其他设置
+# ================================================================
+# 不尝试在编译时运行测试程序（交叉编译环境无法执行）
+set(CMAKE_CROSSCOMPILING TRUE)
+
+# 设置 RPATH/RUNPATH 以避免硬编码路径
+set(CMAKE_SKIP_RPATH TRUE)
+set(CMAKE_SKIP_BUILD_RPATH TRUE)
