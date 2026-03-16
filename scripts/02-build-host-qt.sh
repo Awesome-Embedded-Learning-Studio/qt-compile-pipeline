@@ -114,12 +114,24 @@ CONFIGURE_ARGS+=("-nomake" "tests")
 eval "set -- ${HOST_CONFIGURE_EXTRA:-}"
 CONFIGURE_ARGS+=("$@")
 
+# 准备 CMake 透传参数（在 -- 之后）
+CMAKE_PASS_ARGS=()
+
+# 添加额外的 CMake 参数（如编译器标志等）
+eval "set -- ${HOST_CMAKE_EXTRA:-}"
+CMAKE_PASS_ARGS+=("$@")
+
 # 打印完整 configure 命令（便于调试）
 log_info "Full configure command (run from build directory):"
 echo "${CONFIGURE_SCRIPT} \\"
 for arg in "${CONFIGURE_ARGS[@]}"; do
     echo "  ${arg}"
 done
+if [[ ${#CMAKE_PASS_ARGS[@]} -gt 0 ]]; then
+    for arg in "${CMAKE_PASS_ARGS[@]}"; do
+        echo "  ${arg}"
+    done
+fi
 echo ""
 
 # 切换到构建目录并运行 configure
@@ -127,7 +139,9 @@ cd "${BUILD_DIR}" || die "Failed to enter build directory: ${BUILD_DIR}"
 
 # 执行 configure 脚本
 # 注意：configure 会自动调用 CMake 并使用 Ninja
-"${CONFIGURE_SCRIPT}" "${CONFIGURE_ARGS[@]}" || die "Configure failed"
+# 使用 -- 分隔 configure 参数和 CMake 参数
+"${CONFIGURE_SCRIPT}" "${CONFIGURE_ARGS[@]}" -- "${CMAKE_PASS_ARGS[@]}" \
+    || die "Configure failed"
 
 # ---------------------------------------------------------------
 # 编译
